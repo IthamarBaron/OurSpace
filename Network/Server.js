@@ -1,4 +1,8 @@
 const WebSocket = require('ws');
+
+const IP = '10.100.102.34'; 
+const PORT = 8080; 
+
 const cooldownSeconds = 9; // Cooldown in seconds
 const lastPixelPlacement = new Map(); // Tracks last placement timestamps per client
 let numbername = 1;
@@ -6,9 +10,10 @@ const canvas = Array(25) // rows
     .fill(null)
     .map(() => Array(30).fill('#FFFFFF')); // Adjust columns and default color
 
-// Create WebSocket server
-const wss = new WebSocket.Server({ port: 8080 });
-
+// Create the WebSocket server
+const wss = new WebSocket.Server({ host: IP, port: PORT }, () => {
+    console.log(`WebSocket server is running on ws://${IP}:${PORT}`);
+});
 let users = []; // List of connected players
 
 // Handle WebSocket connections
@@ -134,4 +139,3 @@ function broadcast(data) {
     });
 }
 
-console.log('WebSocket server is running on ws://localhost:8080');
