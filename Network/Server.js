@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 
-const IP = '10.100.102.34'; 
+const IP = 'ENTER IP'; 
 const PORT = 8080; 
 
 const cooldownSeconds = 9; // Cooldown in seconds
