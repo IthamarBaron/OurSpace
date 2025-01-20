@@ -37,7 +37,8 @@ Our Place is a collaborative pixel art web application inspired by R/Place. User
    node Server.js
 The server will run on ws://localhost:8080 by default.
 
-4. **Access the Application:***
+4. ***Access the Application:***
+
 Open welcomePage.html in your browser, enter your name, and start placing pixels.
 
 ---
