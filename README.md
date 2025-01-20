@@ -26,15 +26,15 @@ Our Place is a collaborative pixel art web application inspired by R/Place. User
 1. **Clone the Repository**:
    ```bash
    git clone https://github.com/IthamarBaron/OurSpace/tree/main
-   cd our-place```
+   cd our-place
    
 2. **Install Dependencies**:
    ```bash
-   npm install ws```
+   npm install ws
    
 3. **Run the Server**:
    ```bash
-   node Server.js```
+   node Server.js
 The server will run on ws://localhost:8080 by default.
 
 4. Access the Application
