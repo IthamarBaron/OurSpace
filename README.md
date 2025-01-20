@@ -49,3 +49,6 @@ Open welcomePage.html in your browser, enter your name, and start placing pixels
 - **Pixel Placement**: Users pick a color and place pixels on the grid. A cooldown prevents spamming.
 - **Real-Time Updates**: WebSockets ensure everyone sees the latest canvas updates instantly.
 
+## Acknowledgments
+
+Inspired by R/Place and built to have some fun with Node.js and web development in jeneral.
