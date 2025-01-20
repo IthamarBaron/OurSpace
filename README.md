@@ -36,7 +36,9 @@ Our Place is a collaborative pixel art web application inspired by R/Place. User
    ```bash
    node Server.js
 The server will run on ws://localhost:8080 by default.
+
 **4. Set the IP:**
+
 Set the IP variable in 'Server.js' and in 'methods.js'
 
 **5. Access the Application:**
