@@ -1,0 +1,153 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f4f4f4;
+    min-height: 100vh;
+}
+
+.container {
+    text-align: center;
+    padding: 20px;
+}
+.grid {
+    display: grid;
+    grid-template-rows: repeat(20, 20px);
+    grid-template-columns: repeat(30, 20px);
+    gap: 1px; /* Reduce the gap slightly to make it even */
+    margin: 20px auto;
+    background-color: #ccc; /* Matches the gaps */
+    border: 2px solid #000; /* Ensure even border on all sides */
+    box-sizing: border-box; /* Includes padding and borders in width/height */
+}
+
+.cell {
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    box-sizing: border-box; /* Ensures consistent size including borders */
+    transition: 20ms;
+}
+
+.cell:hover {
+    border-color: #999;
+    transform: scale(1.2);
+}
+
+
+.palette {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.color {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.color:hover {
+    transform: scale(1.1);
+}
+
+.color.selected {
+    border: 3px solid #000;
+}
+.cooldown {
+    text-align: center;
+    margin: 20px auto;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    width: 300px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: block; 
+}
+.cooldown-warning {
+    border-color: red;
+    box-shadow: 0 0 10px red;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+
+/* Main container layout */
+.main-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px; /* Space between the grid and the player list */
+    margin-top: 20px;
+    width: 100%; /* Full width to position elements on the sides */
+}
+
+/* Adjust grid section to take most of the width */
+.container {
+    flex: 1;
+    text-align: center;
+}
+
+
+/* Player list container fixed to the right side of the screen */
+.player-list-container {
+    position: fixed; /* Position the list relative to the viewport */
+    top: 50px; /* Adjust the vertical position as needed */
+    right: 20px; /* Keep it slightly away from the right edge */
+    width: 250px; /* Fixed width for the player list */
+    background-color: #f9f9f9;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Player list title */
+.player-list-container h2 {
+    font-size: 1.2rem;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* Player list styles */
+.player-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.player-list li {
+    padding: 5px 10px;
+    margin: 5px 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    text-align: center;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Highlight effect on hover for player list items */
+.player-list li:hover {
+    background-color: #f0f0f0;
+    cursor: default;
+}
+.cooldown-ready {
+    border-color: green;
+    box-shadow: 0 0 10px green;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
