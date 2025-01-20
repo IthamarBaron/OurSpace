@@ -1,5 +1,8 @@
-const cooldownAmount = 10;
-let cooldownTime = 0; // Cooldown in seconds
+const IP = 'ws://ENTER IP:8080';
+
+
+const cooldownAmount = 10;//dont bother changing, this is validated by the server ;) this is just for your display
+let cooldownTime = 0; 
 const cooldownElement = document.getElementById('cooldown');
 
 // Create a 25x30 grid dynamically
@@ -68,8 +71,7 @@ setInterval(updateCooldown, 1000);
 
 
 // websocket stuff
-
-const ws = new WebSocket('ws://localhost:8080'); // Connect to the WebSocket server
+const ws = new WebSocket(IP);
 const playerName = localStorage.getItem('playerName'); // Retrieve the player's name
 
 if (playerName) {
