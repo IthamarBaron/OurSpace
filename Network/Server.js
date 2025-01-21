@@ -2,6 +2,7 @@ const WebSocket = require('ws');
 
 const IP = 'ENTER IP'; 
 const PORT = 8080; 
+const ipCooldownMap = new Map(); // Tracks cooldowns for each IP
 
 const cooldownSeconds = 9; // Cooldown in seconds
 const lastPixelPlacement = new Map(); // Tracks last placement timestamps per client
@@ -75,6 +76,8 @@ function handlePixelPlaced(ws, data) {
     const { color, x, y } = data;
 
     const now = Date.now();
+    const clientIp = ws._socket.remoteAddress; // Get the client's IP address
+
     // Check if the player has a valid name
     if (!ws.name) {
         ws.send(JSON.stringify({ type: 'error', message: 'Player not recognized' }));
@@ -97,8 +100,24 @@ function handlePixelPlaced(ws, data) {
         return;
     }
 
+    const lastIpPlacement = ipCooldownMap.get(clientIp) || 0;
+
+    if (now - lastIpPlacement < cooldownSeconds * 1000) {
+        ws.send(
+            JSON.stringify({
+                type: 'error',
+                message: `IP cooldown active. Please wait ${Math.ceil(
+                    (cooldownSeconds * 1000 - (now - lastIpPlacement)) / 1000
+                )} seconds.`,
+            })
+        );
+        return;
+    }
+
+
     // Update the last placement time
     lastPixelPlacement.set(ws.name, now);
+    ipCooldownMap.set(clientIp, now);
 
     // Update the canvas state
     canvas[y][x] = color;
