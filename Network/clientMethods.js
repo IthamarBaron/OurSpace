@@ -1,6 +1,7 @@
+const IP = 'ws://ENTER IP:8080';
 // Handle the form submission
 const joinForm = document.getElementById('joinForm');
-const ws = new WebSocket('ws://localhost:8080'); // Connect to the WebSocket server
+const ws = new WebSocket(IP); // Connect to the WebSocket server
 
 joinForm.addEventListener('submit', (e) => {
     e.preventDefault();
