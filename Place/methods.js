@@ -128,7 +128,6 @@ grid.addEventListener('click', (e) => {
 
 });
 
-// Handle messages from the server
 ws.addEventListener('message', (message) => {
     const data = JSON.parse(message.data);
 
@@ -138,7 +137,24 @@ ws.addEventListener('message', (message) => {
         // Update the grid cell color
         const cell = document.querySelector(`.cell[data-row="${y}"][data-col="${x}"]`);
         if (cell) {
-            cell.style.backgroundColor = color;
+            if (color === 'secret') {
+                // Rainbow mode
+                let hue = 0;
+                if (cell.rainbowInterval) {
+                    clearInterval(cell.rainbowInterval); // Clear any existing interval to avoid conflicts
+                }
+                cell.rainbowInterval = setInterval(() => {
+                    cell.style.backgroundColor = `hsl(${hue}, 100%, 50%)`; // Cycle through HSL colors
+                    hue = (hue + 10) % 360; // Increment hue and wrap around at 360
+                }, 100); 
+            } else {
+                // Clear rainbow mode if any and set the specified color
+                if (cell.rainbowInterval) {
+                    clearInterval(cell.rainbowInterval);
+                    delete cell.rainbowInterval;
+                }
+                cell.style.backgroundColor = color;
+            }
         }
     }
 });
