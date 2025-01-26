@@ -1,10 +1,10 @@
 const WebSocket = require('ws');
 
-const IP = 'ENTER IP'; 
+const IP = 'Enter IP'; 
 const PORT = 8080; 
 const ipCooldownMap = new Map(); // Tracks cooldowns for each IP
-
-const cooldownSeconds = 9; // Cooldown in seconds
+var cID = 0;
+const cooldownSeconds = 10; // Cooldown in seconds
 const lastPixelPlacement = new Map(); // Tracks last placement timestamps per client
 let numbername = 1;
 const canvas = Array(25) // rows
@@ -48,6 +48,11 @@ wss.on('connection', (ws) => {
 function handleJoin(ws, data) {
     let name = data.name;
 
+    if(name.length >10)
+    {
+        name = "stupid" + numbername;
+        numbername+=1;
+    }
 
     if (users.includes(name)) {
         name+= ""+numbername;
@@ -56,7 +61,8 @@ function handleJoin(ws, data) {
 
     users.push(name);
     // Associate the WebSocket connection with the player's name
-    ws.name = name;
+    ws.name = ""+cID;
+    cID++;
 
     console.log(`${name} joined the game`);
 
@@ -74,6 +80,13 @@ function handleJoin(ws, data) {
 // Function to handle pixel placement
 function handlePixelPlaced(ws, data) {
     const { color, x, y } = data;
+    
+    console.log(`${ws.name} attempted to placed a pixel at (${x}, ${y}) with color ${color}`);
+    if (!(x >= 0 && x < cols && y >= 0 && y < rows))
+    {
+        console.log("PIXEL IS OUT OF BOUND!")
+        return;
+    }
 
     const now = Date.now();
     const clientIp = ws._socket.remoteAddress; // Get the client's IP address
@@ -83,30 +96,15 @@ function handlePixelPlaced(ws, data) {
         ws.send(JSON.stringify({ type: 'error', message: 'Player not recognized' }));
         return;
     }
-    // Check the last placement time for this player
-    const lastPlacement = lastPixelPlacement.get(ws.name) || 0;
 
-
-    if (now - lastPlacement < cooldownSeconds * 1000) {
-        // Reject if within cooldown period
-        ws.send(
-            JSON.stringify({
-                type: 'error',
-                message: `Cooldown active. Please wait ${Math.ceil(
-                    (cooldownSeconds * 1000 - (now - lastPlacement)) / 1000
-                )} seconds.`,
-            })
-        );
-        return;
-    }
-
+    // Check IP-based cooldown
     const lastIpPlacement = ipCooldownMap.get(clientIp) || 0;
 
     if (now - lastIpPlacement < cooldownSeconds * 1000) {
         ws.send(
             JSON.stringify({
                 type: 'error',
-                message: `IP cooldown active. Please wait ${Math.ceil(
+                message: `Cooldown active. Please wait ${Math.ceil(
                     (cooldownSeconds * 1000 - (now - lastIpPlacement)) / 1000
                 )} seconds.`,
             })
@@ -114,9 +112,7 @@ function handlePixelPlaced(ws, data) {
         return;
     }
 
-
-    // Update the last placement time
-    lastPixelPlacement.set(ws.name, now);
+    // Update the last placement time for the IP
     ipCooldownMap.set(clientIp, now);
 
     // Update the canvas state
@@ -132,6 +128,7 @@ function handlePixelPlaced(ws, data) {
 
     console.log(`${ws.name} placed a pixel at (${x}, ${y}) with color ${color}`);
 }
+
 
 // Function to handle player disconnect
 function handleDisconnect(ws) {
@@ -157,4 +154,3 @@ function broadcast(data) {
         }
     });
 }
-
