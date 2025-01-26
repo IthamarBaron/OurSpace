@@ -1,4 +1,3 @@
-#LIVE GAME AT 192.168.16.244
 # Our Place
 
 Our Place is a collaborative pixel art web application inspired by R/Place. Users join a shared canvas, pick a color, and place pixels on a grid. A cooldown period ensures fair collaboration.
