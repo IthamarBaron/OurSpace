@@ -1,6 +1,7 @@
 const WebSocket = require('ws');
 
-const IP = 'Enter IP'; 
+const idToNameMap = new Map(); // Maps ws.name (ID) to user names
+const IP = 'Enter ServerIP'; 
 const PORT = 8080; 
 const ipCooldownMap = new Map(); // Tracks cooldowns for each IP
 var cID = 0;
@@ -17,57 +18,100 @@ const wss = new WebSocket.Server({ host: IP, port: PORT }, () => {
 });
 let users = []; // List of connected players
 
+const connectionCount = new Map(); // Tracks connection counts per IP
+const maxConnectionsPerIP = 5;
+
 // Handle WebSocket connections
 wss.on('connection', (ws) => {
-    console.log('A new client connected');
+    const clientIp = ws._socket.remoteAddress;
+    const currentConnections = connectionCount.get(clientIp) || 0;
 
-    // Handle incoming messages
-    ws.on('message', (message) => {
-        try {
-            const data = JSON.parse(message);
+    // Limit connections per IP
+    if (currentConnections >= maxConnectionsPerIP) {
+        ws.close(1000, "Too many connections from your IP.");
+        console.log(`Connection from IP ${clientIp} rejected: Too many connections.`);
+        return;
+    }
 
-            if (data.type === 'join') {
-                handleJoin(ws, data); // Call handleJoin for "join" messages
-            } else if (data.type === 'pixelPlaced') {
-                handlePixelPlaced(ws, data); // Call handlePixelPlaced for pixel updates
-            } else {
-                console.log('Unknown message type:', data.type);
-            }
-        } catch (err) {
-            console.error('Error parsing message:', err);
+    // Increment the connection count for this IP
+    connectionCount.set(clientIp, currentConnections + 1);
+    console.log(`A new client connected from IP ${clientIp}. Current connections: ${connectionCount.get(clientIp)}`);
+
+    const messageRateLimit = 5; // Max 5 messages per second
+const messageTimestamps = new Map(); // Tracks the last message timestamp for each client
+
+ws.on('message', (message) => {
+    const now = Date.now();
+    const lastMessageTime = messageTimestamps.get(ws.name) || 0;
+
+    // Check the rate limit
+    if (now - lastMessageTime < 1000 / messageRateLimit) {
+        console.log(`Message rate limit exceeded for client ID: ${ws.name}`);
+        return; // Drop excessive messages
+    }
+
+    // Update the timestamp for this client
+    messageTimestamps.set(ws.name, now);
+
+    // Process the message
+    try {
+        const data = JSON.parse(message);
+
+        if (data.type === 'join') {
+            handleJoin(ws, data); // Call handleJoin for "join" messages
+        } else if (data.type === 'pixelPlaced') {
+            handlePixelPlaced(ws, data); // Call handlePixelPlaced for pixel updates
+        } else {
+            console.log('Unknown message type:', data.type);
         }
-    });
+    } catch (err) {
+        console.error('Error parsing message:', err);
+    }
+});
+
 
     // Handle client disconnections
     ws.on('close', () => {
+        console.log(`Client disconnected from IP ${clientIp}.`);
+        
+        // Decrement the connection count for this IP
+        const updatedConnections = connectionCount.get(clientIp) - 1;
+        if (updatedConnections <= 0) {
+            connectionCount.delete(clientIp); // Clean up if no connections remain
+        } else {
+            connectionCount.set(clientIp, updatedConnections);
+        }
+
         handleDisconnect(ws); // Handle player disconnection
     });
 });
 
-// Function to handle player join
 function handleJoin(ws, data) {
     let name = data.name;
 
-    if(name.length >10)
-    {
+    // Ensure the name is not too long; otherwise, replace it
+    if (name.length > 10) {
         name = "stupid" + numbername;
-        numbername+=1;
+        numbername += 1;
     }
 
+    // Ensure the name is unique in the users list
     if (users.includes(name)) {
-        name+= ""+numbername;
-        numbername+=1;
+        name = name + numbername;
+        numbername += 1;
     }
 
+    // Push the final unique name to the users list
     users.push(name);
-    // Associate the WebSocket connection with the player's name
-    ws.name = ""+cID;
+
+    // Associate the WebSocket connection with a unique ID (for security)
+    ws.name = "" + cID; // Use cID as a unique identifier
+    idToNameMap.set(ws.name, name); // Map the ws.name (ID) to the actual name
     cID++;
 
     console.log(`${name} joined the game`);
 
-
-    // Send the full canvas state to the new client 
+    // Send the full canvas state to the new client
     ws.send(JSON.stringify({ type: 'canvasState', canvas }));
 
     // Broadcast the updated player list to all clients
@@ -77,12 +121,14 @@ function handleJoin(ws, data) {
     });
 }
 
+
+
 // Function to handle pixel placement
 function handlePixelPlaced(ws, data) {
     const { color, x, y } = data;
     
     console.log(`${ws.name} attempted to placed a pixel at (${x}, ${y}) with color ${color}`);
-    if (!(x >= 0 && x < cols && y >= 0 && y < rows))
+    if (!(x >= 0 && x < 30 && y >= 0 && y < 25))
     {
         console.log("PIXEL IS OUT OF BOUND!")
         return;
@@ -133,16 +179,25 @@ function handlePixelPlaced(ws, data) {
 // Function to handle player disconnect
 function handleDisconnect(ws) {
     if (ws.name) {
-        console.log(`${ws.name} disconnected`);
+        const name = idToNameMap.get(ws.name); // Get the actual name using ws.name (ID)
 
-        // Remove the player from the list
-        users = users.filter((user) => user !== ws.name);
+        if (name) {
+            console.log(`${name} (ID: ${ws.name}) disconnected`);
 
-        // Broadcast the updated player list to all clients
-        broadcast({
-            type: 'update',
-            users,
-        });
+            // Remove the player from the list
+            users = users.filter((user) => user !== name);
+
+            // Remove the name from the mapping
+            idToNameMap.delete(ws.name);
+
+            // Broadcast the updated player list to all clients
+            broadcast({
+                type: 'update',
+                users,
+            });
+        } else {
+            console.log(`Unknown ID ${ws.name} attempted to disconnect.`);
+        }
     }
 }
 
