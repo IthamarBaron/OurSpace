@@ -54,4 +54,4 @@ Open welcomePage.html in your browser, enter your name, and start placing pixels
 
 ## Acknowledgments
 
-Inspired by R/Place and built to have some fun with Node.js and web development in jeneral.
+Inspired by R/Place and built to have some fun with Node.js and web development in general.
